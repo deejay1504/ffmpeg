@@ -22,7 +22,7 @@
 <nav class="navbar navbar-inverse">
 	<div class="container">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="#">Spring 4 MVC Ajax Hello World</a>
+			<a class="navbar-brand" href="#">Video File Converter</a>
 		</div>
 	</div>
 </nav>
@@ -37,15 +37,15 @@
 
 		<form class="form-horizontal" id="search-form">
 			<div class="form-group form-group-lg">
-				<label class="col-sm-2 control-label">Username</label>
+				<label class="col-sm-2 control-label">Input File</label>
 				<div class="col-sm-10">
-					<input type=text class="form-control" id="username">
+					<input type=text class="form-control" id="inputFile">
 				</div>
 			</div>
 			<div class="form-group form-group-lg">
-				<label class="col-sm-2 control-label">Email</label>
+				<label class="col-sm-2 control-label">Output File</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="email">
+					<input type="text" class="form-control" id="outputFile">
 				</div>
 			</div>
 
@@ -80,15 +80,15 @@
 
 	function searchViaAjax() {
 
-		var search = {}
-		search["username"] = $("#username").val();
-		search["email"] = $("#email").val();
+		var fileNames = {}
+		fileNames["inputFile"] = $("#inputFile").val();
+		fileNames["outputFile"] = $("#outputFile").val();
 
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
-			url : "${home}search/api/getSearchResult",
-			data : JSON.stringify(search),
+			url : "${home}ffmpeg/api/convertFile",
+			data : JSON.stringify(fileNames),
 			dataType : 'json',
 			timeout : 100000,
 			success : function(data) {

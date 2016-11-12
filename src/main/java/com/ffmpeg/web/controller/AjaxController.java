@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ffmpeg.web.jsonview.Views;
 import com.ffmpeg.web.model.AjaxResponseBody;
-import com.ffmpeg.web.model.SearchCriteria;
+import com.ffmpeg.web.model.FileDetails;
 import com.ffmpeg.web.model.User;
 
 @RestController
@@ -25,13 +25,13 @@ public class AjaxController {
 	// @RequestBody - Convert the json data into object (SearchCriteria) mapped by field name.
 	// @JsonView(Views.Public.class) - Optional, limited the json data display to client.
 	@JsonView(Views.Public.class)
-	@RequestMapping(value = "/search/api/getSearchResult")
-	public AjaxResponseBody getSearchResultViaAjax(@RequestBody SearchCriteria search) {
+	@RequestMapping(value = "/ffmpeg/api/convertFile")
+	public AjaxResponseBody getSearchResultViaAjax(@RequestBody FileDetails fileNames) {
 
 		AjaxResponseBody result = new AjaxResponseBody();
 
-		if (isValidSearchCriteria(search)) {
-			List<User> users = findByUserNameOrEmail(search.getUsername(), search.getEmail());
+		if (isValidSearchCriteria(fileNames)) {
+			List<User> users = null;//findByUserNameOrEmail(search.getUsername(), search.getEmail());
 
 			if (users.size() > 0) {
 				result.setCode("200");
@@ -52,15 +52,15 @@ public class AjaxController {
 
 	}
 
-	private boolean isValidSearchCriteria(SearchCriteria search) {
+	private boolean isValidSearchCriteria(FileDetails fileNames) {
 
 		boolean valid = true;
 
-		if (search == null) {
+		if (fileNames == null) {
 			valid = false;
 		}
 
-		if ((StringUtils.isEmpty(search.getUsername())) && (StringUtils.isEmpty(search.getEmail()))) {
+		if (StringUtils.isEmpty(fileNames.getInputFile()) || StringUtils.isEmpty(fileNames.getOutputFile())) {
 			valid = false;
 		}
 
