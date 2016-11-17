@@ -16,7 +16,10 @@
 
 <spring:url value="/resources/core/js/jquery.1.10.2.min.js"
 	var="jqueryJs" />
+<spring:url value="/resources/core/js/timer.jquery.min.js"
+	var="jqueryTimerJs" />
 <script src="${jqueryJs}"></script>
+<script src="${jqueryTimerJs}"></script>
 </head>
 
 <nav class="navbar navbar-inverse">
@@ -35,24 +38,34 @@
 
 		<div id="feedback"></div>
 
-		<form class="form-horizontal" id="search-form">
+		<form class="form-horizontal" id="file-convert-form">
 			<div class="form-group form-group-lg">
 				<label class="col-sm-2 control-label">Input File</label>
 				<div class="col-sm-10">
-					<input type=text class="form-control" id="inputFile">
+					<p onclick="jQuery('#file').trigger('click');"></p>
+					<input type="file" id="inputFile" name="inputFile"/>
+					<!-- <input type=text class="form-control" id="inputFile">  -->
 				</div>
 			</div>
+			
 			<div class="form-group form-group-lg">
 				<label class="col-sm-2 control-label">Output File</label>
 				<div class="col-sm-10">
 					<input type="text" class="form-control" id="outputFile">
 				</div>
 			</div>
+			
+			<div class="form-group form-group-lg">
+				<label class="col-sm-2 control-label">Processing Time</label>
+				<div id="divTimer" class="col-sm-2">
+					<input type="text" class="form-control" id="timer" name="timer" placeholder="0 sec">
+				</div>
+			</div>
 
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" id="bth-search"
-						class="btn btn-primary btn-lg">Search</button>
+						class="btn btn-primary btn-lg">Convert</button>
 				</div>
 			</div>
 		</form>
@@ -64,7 +77,15 @@
 <script>
 	jQuery(document).ready(function($) {
 
-		$("#search-form").submit(function(event) {
+		$("#file-convert-form").submit(function(event) {
+			//<div id="divTimer" class="col-sm-2">
+			//		<input type="text" class="form-control" id="timer" name="timer" placeholder="0 sec">
+			//	</div>
+			//$('#divTimer').get(0).type = 'text';
+			//$("#divTimer").addClass("col-sm-2");
+			//$("#divTimer").addClass("form-control");
+			$("#divTimer").timer("remove");
+			$("#divTimer").timer("start");
 
 			// Disble the search button
 			enableSearchButton(false);
@@ -72,13 +93,19 @@
 			// Prevent the form from submitting via the browser.
 			event.preventDefault();
 
-			searchViaAjax();
+			convertViaAjax();
 
+		});
+		
+		$("#inputFile").change(function() {
+			var inputFile = $("#inputFile").val();
+			var fileParts = inputFile.split(".");
+			$("#outputFile").val(fileParts[0] + ".new.mp4")
 		});
 
 	});
 
-	function searchViaAjax() {
+	function convertViaAjax() {
 
 		var fileNames = {}
 		fileNames["inputFile"] = $("#inputFile").val();
@@ -106,7 +133,7 @@
 		});
 
 	}
-
+	
 	function enableSearchButton(flag) {
 		$("#btn-search").prop("disabled", flag);
 	}
@@ -115,6 +142,7 @@
 		var json = "<h4>Ajax Response</h4><pre>"
 				+ JSON.stringify(data, null, 4) + "</pre>";
 		$('#feedback').html(json);
+		$("#divTimer").timer("pause");
 	}
 </script>
 

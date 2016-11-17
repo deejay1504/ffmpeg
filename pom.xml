@@ -63,7 +63,7 @@
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
-
+		
 		<!-- compile only, deployed container will provide this -->
 		<!-- Need this for config annotation -->
 		<dependency>
