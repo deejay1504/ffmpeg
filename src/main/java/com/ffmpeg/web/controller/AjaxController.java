@@ -3,6 +3,10 @@ package com.ffmpeg.web.controller;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecuteResultHandler;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -16,30 +20,38 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ffmpeg.web.jsonview.Views;
 import com.ffmpeg.web.model.AjaxResponseBody;
 import com.ffmpeg.web.model.FileDetails;
+import com.ffmpeg.web.utils.Constants;
 
 @Configuration
 @PropertySources({
 	@PropertySource("classpath:ffmpeg.properties")
 })
 
-
+/**
+ * Generate and call an ffmpeg command in the form:
+ * 
+ * ffmpeg -i c:\temp\t.mp4 -c:v libx264 -crf 20 -preset slow -c:a copy c:\temp\t.new.mp4 -nostats -loglevel 0
+ *
+ */
 @RestController
 public class AjaxController {
 	@Autowired
 	Environment env;
+	
+	private DefaultExecutor executor;
 
 	// @ResponseBody, not necessary, since class is annotated with @RestController
-	// @RequestBody - Convert the json data into object (SearchCriteria) mapped by field name.
+	// @RequestBody - Convert the json data into object (FileDetails) mapped by field name.
 	// @JsonView(Views.Public.class) - Optional, limited the json data display to client.
 	@JsonView(Views.Public.class)
 	@RequestMapping(value = "/ffmpeg/api/convertFile")
-	public AjaxResponseBody getSearchResultViaAjax(@RequestBody FileDetails fileNames) {
+	public AjaxResponseBody convertFileViaAjax(@RequestBody FileDetails fileNames) {
 
 		AjaxResponseBody result = new AjaxResponseBody();
 		try {
-			int processCode = convertFile(fileNames);
+			convertFile(fileNames);
 			result.setCode("200");
-			result.setMsg(" Process code: " + processCode + ", successfully converted " + fileNames.getOutputFile());
+			result.setMsg(" Successfully converted " + fileNames.getOutputFile());
 		} catch (IOException e) {
 			result.setCode("400");
 			result.setMsg("Error processing " + fileNames.getInputFile() + " " + e.toString());
@@ -47,42 +59,59 @@ public class AjaxController {
 			result.setCode("400");
 			result.setMsg("Conversion error " + e.toString());
 		}
-		
-		return result;
 
+		return result;
 	}
 	
-	private int convertFile(FileDetails fileNames) throws IOException, InterruptedException {
-		String filePath = env.getProperty("file.path");
-		String ffmpegPath = env.getProperty("ffmpeg.path");
-		String ffmpegFormat = env.getProperty("ffmpeg.format");
-		String ffmpegPreset = env.getProperty("ffmpeg.preset");
-		int ffmpegCrf = Integer.valueOf(env.getProperty("ffmpeg.crf"));
+	@RequestMapping(value = "/ffmpeg/api/cancelConversion")
+	public AjaxResponseBody cancelConversionViaAjax() {
+		AjaxResponseBody result = new AjaxResponseBody();
+		result.setCode("200");
+		if (executor == null) {
+			result.setMsg("Conversion process is not running");
+		} else {
+			executor.getWatchdog().destroyProcess();
+			result.setMsg(" Successfully cancelled process");
+		}
+		return result;
+	}
+	
+	private void convertFile(FileDetails fileDetails) throws IOException, InterruptedException {
+		String filePath = env.getProperty(Constants.Property.FILE_PATH);
+		String ffmpegPath = env.getProperty(Constants.Property.PATH);
+		String ffmpegFormat = env.getProperty(Constants.Property.FORMAT);
+		String ffmpegPreset = fileDetails.getFfmpegPreset();
+		int ffmpegCrf = fileDetails.getFfmpegCrf();
 		
-		File outputFile = new File(filePath + fileNames.getOutputFile());
+		File outputFile = new File(filePath + fileDetails.getOutputFile());
 		if (outputFile.exists()) {
 			outputFile.delete();
 		}
 		
 		StringBuilder ffmpegCmd = new StringBuilder();
 		ffmpegCmd.append(ffmpegPath)
-				 .append(" -i ")
+				 .append(Constants.Ffmpeg.INPUT)
 				 .append(filePath)
-				 .append(fileNames.getInputFile())
-				 .append(" -c:v ")
+				 .append(fileDetails.getInputFile())
+				 .append(Constants.Ffmpeg.FORMAT)
 				 .append(ffmpegFormat)
-				 .append(" -crf ")
+				 .append(Constants.Ffmpeg.CONVERSION_RATE)
 				 .append(ffmpegCrf)
-				 .append(" -preset ")
+				 .append(Constants.Ffmpeg.PRESET)
 				 .append(ffmpegPreset)
-				 .append(" -c:a copy ")
+				 .append(Constants.Ffmpeg.OUTPUT)
 				 .append(filePath)
-				 .append(fileNames.getOutputFile());
-
-		Process p = Runtime.getRuntime().exec(ffmpegCmd.toString());
-		p.waitFor();
-		return p.exitValue();
-
+				 .append(fileDetails.getOutputFile())
+				 .append(Constants.Ffmpeg.LOGGING_OFF);
+	
+		System.out.println(ffmpegCmd.toString());
+		DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
+		CommandLine commandLine = CommandLine.parse(ffmpegCmd.toString());
+		executor = new DefaultExecutor();
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
+		executor.setWatchdog(watchdog);
+		executor.execute(commandLine, resultHandler);
+		resultHandler.waitFor();
 	}
 	
 }
