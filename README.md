@@ -1,5 +1,5 @@
-Convert video files using command line ffmpeg call
-==================================================
+Convert video files by using Apache Commons-Exec to run ffmpeg
+==============================================================
 
 ###1. Technologies used
 * Spring 4.2.2.RELEASE
@@ -7,6 +7,7 @@ Convert video files using command line ffmpeg call
 * jQuery 1.10.2
 * Boostrap 3
 * Maven 3
+* Apache commons-exec 1.3
 
 ###2. To Run this project locally
 ```shell

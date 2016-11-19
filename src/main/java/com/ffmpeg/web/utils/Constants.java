@@ -20,6 +20,6 @@ public final class Constants {
     	public static final String CONVERSION_RATE = " -crf ";
     	public static final String PRESET          = " -preset ";
     	public static final String OUTPUT          = " -c:a copy ";
-    	public static final String LOGGING_OFF     = " -nostats -loglevel 0 ";
+    	public static final String LOGGING_OFF     = " -nostats -loglevel 0";
     }
 }

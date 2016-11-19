@@ -51,9 +51,13 @@
 		});
 		
 		$("#inputFile").change(function() {
-			var inputFile = $("#inputFile").val();
-			var fileParts = inputFile.split(".");
-			$("#outputFile").val(fileParts[0] + ".new.mp4")
+			if ($("#inputFile").val().indexOf(' ') >= 0) {
+				alert("Please don't use files with spaces");
+			} else {
+				var inputFile = $("#inputFile").val();
+				var fileParts = inputFile.split(".");
+				$("#outputFile").val(fileParts[0] + ".new.mp4")
+			}
 		});
 
 	});
