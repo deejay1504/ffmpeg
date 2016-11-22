@@ -1,0 +1,27 @@
+/* For HTML colors see - http://html-color-codes.info */
+
+.yellow-background {
+     background-color:#F4FA58; 
+}
+
+.red-background {
+     background-color:#FF0000; 
+}
+
+.light-blue-background {
+     background-color:#CEF6F5; 
+}
+
+#modalCloseButton {
+     background-color:#CEF6F5; /* Light blue */
+}
+
+.modal-content {
+    overflow:hidden;
+}
+
+/** This makes the tool tip appear in one long line and not wrap around **/
+.tooltip-inner {
+    max-width: none;
+    white-space: nowrap;
+}

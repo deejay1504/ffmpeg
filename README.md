@@ -6,6 +6,7 @@ Convert video files by using Apache Commons-Exec to run ffmpeg
 * Jackson 2.6.3
 * jQuery 1.10.2
 * Boostrap 3
+* Bootbox 4
 * Maven 3
 * Apache commons-exec 1.3
 
