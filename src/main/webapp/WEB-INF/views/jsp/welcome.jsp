@@ -24,6 +24,8 @@
 
 <script>
 	jQuery(document).ready(function($) {
+		$("#dateToday").text((new Date()).toString().split(' ').splice(0,4).join(' '));
+		
 		$("a.tooltipLink").tooltip({placement : 'right'});
 		
 		$("#btn-convert").click(function(event) {
@@ -180,7 +182,8 @@
 <nav class="navbar navbar-inverse">
 	<div class="container">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="#">Video File Converter</a>
+			<label class="col-md-offset-20 navbar-brand" style="margin-right:550px;">Video File Converter</label>
+			<label id="dateToday" class="navbar-brand"></label>
 		</div>
 	</div>
 </nav>
@@ -188,8 +191,7 @@
 <div class="container" style="min-height: 500px">
 
 	<div class="starter-template">
-		<h2>File Conversion</h2>
-		<br>
+		<br><br><br>
 
 	    <div id="alertModal" class="modal fade">
 		    <div class="modal-dialog">

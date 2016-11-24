@@ -22,4 +22,21 @@ public final class Constants {
     	public static final String OUTPUT          = " -c:a copy ";
     	public static final String LOGGING_OFF     = " -nostats -loglevel 0";
     }
+	
+	public final class Codes {
+		private Codes() {}
+		
+		public static final String SUCCESS = "200";
+		public static final String ERROR   = "400";
+	}
+
+	public final class Messages {
+		private Messages() {}
+		
+		public static final String SUCCESS          = "Successfully converted {0}";
+		public static final String CANCEL_SUCCESS   = "Successfully cancelled process";
+		public static final String ERROR            = "Error processing {0} {1}";
+		public static final String CONVERSION_ERROR = "Conversion error {0}";
+		public static final String CANCEL_CONV      = "Conversion process is not running";
+	}
 }

@@ -2,6 +2,7 @@ package com.ffmpeg.web.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -45,19 +46,17 @@ public class AjaxController {
 	// @JsonView(Views.Public.class) - Optional, limited the json data display to client.
 	@JsonView(Views.Public.class)
 	@RequestMapping(value = "/ffmpeg/api/convertFile")
-	public AjaxResponseBody convertFileViaAjax(@RequestBody FileDetails fileNames) {
+	public AjaxResponseBody convertFileViaAjax(@RequestBody FileDetails fileDetails) {
 
 		AjaxResponseBody result = new AjaxResponseBody();
 		try {
-			convertFile(fileNames);
-			result.setCode("200");
-			result.setMsg(" Successfully converted " + fileNames.getOutputFile());
+			convertFile(fileDetails, result);
 		} catch (IOException e) {
-			result.setCode("400");
-			result.setMsg("Error processing " + fileNames.getInputFile() + " " + e.toString());
+			result.setCode(Constants.Codes.SUCCESS);
+			result.setMsg(MessageFormat.format(Constants.Messages.ERROR, fileDetails.getInputFile(), e.toString()));
 		} catch (InterruptedException e) {
-			result.setCode("400");
-			result.setMsg("Conversion error " + e.toString());
+			result.setCode(Constants.Codes.ERROR);
+			result.setMsg(MessageFormat.format(Constants.Messages.CONVERSION_ERROR, e.toString()));
 		}
 
 		return result;
@@ -66,22 +65,22 @@ public class AjaxController {
 	@RequestMapping(value = "/ffmpeg/api/cancelConversion")
 	public AjaxResponseBody cancelConversionViaAjax() {
 		AjaxResponseBody result = new AjaxResponseBody();
-		result.setCode("200");
+		result.setCode(Constants.Codes.SUCCESS);
 		if (executor == null) {
-			result.setMsg("Conversion process is not running");
+			result.setMsg(Constants.Messages.CANCEL_CONV);
 		} else {
 			executor.getWatchdog().destroyProcess();
-			result.setMsg(" Successfully cancelled process");
+			result.setMsg(Constants.Messages.CANCEL_SUCCESS);
 		}
 		return result;
 	}
 	
-	private void convertFile(FileDetails fileDetails) throws IOException, InterruptedException {
-		String filePath = env.getProperty(Constants.Property.FILE_PATH);
-		String ffmpegPath = env.getProperty(Constants.Property.PATH);
+	private void convertFile(FileDetails fileDetails, AjaxResponseBody result) throws IOException, InterruptedException {
+		String filePath     = env.getProperty(Constants.Property.FILE_PATH);
+		String ffmpegPath   = env.getProperty(Constants.Property.PATH);
 		String ffmpegFormat = env.getProperty(Constants.Property.FORMAT);
 		String ffmpegPreset = fileDetails.getFfmpegPreset();
-		int ffmpegCrf = fileDetails.getFfmpegCrf();
+		int ffmpegCrf       = fileDetails.getFfmpegCrf();
 		
 		File outputFile = new File(filePath + fileDetails.getOutputFile());
 		if (outputFile.exists()) {
@@ -104,7 +103,6 @@ public class AjaxController {
 				 .append(fileDetails.getOutputFile())
 				 .append(Constants.Ffmpeg.LOGGING_OFF);
 	
-		System.out.println(ffmpegCmd.toString());
 		DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
 		CommandLine commandLine = CommandLine.parse(ffmpegCmd.toString());
 		executor = new DefaultExecutor();
@@ -112,6 +110,17 @@ public class AjaxController {
 		executor.setWatchdog(watchdog);
 		executor.execute(commandLine, resultHandler);
 		resultHandler.waitFor();
+		int exitValue = resultHandler.getExitValue();
+		if (exitValue == 0) {
+			result.setCode(Constants.Codes.SUCCESS);
+			result.setMsg(MessageFormat.format(Constants.Messages.SUCCESS, fileDetails.getInputFile()));
+		} else if (exitValue == 1) {
+			result.setCode(Constants.Codes.SUCCESS);
+			result.setMsg(Constants.Messages.CANCEL_SUCCESS);
+		} else {
+			result.setCode(Constants.Codes.ERROR);
+			result.setMsg(MessageFormat.format(Constants.Messages.ERROR, fileDetails.getInputFile(), resultHandler.getException().toString()));
+		}
 	}
 	
 }

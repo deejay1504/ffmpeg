@@ -1,7 +1,5 @@
 package com.ffmpeg.web.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ffmpeg.web.jsonview.Views;
 
@@ -11,8 +9,6 @@ public class AjaxResponseBody {
 	String msg;
 	@JsonView(Views.Public.class)
 	String code;
-	@JsonView(Views.Public.class)
-	List<User> result;
 
 	public String getMsg() {
 		return msg;
@@ -30,17 +26,11 @@ public class AjaxResponseBody {
 		this.code = code;
 	}
 
-	public List<User> getResult() {
-		return result;
-	}
-
-	public void setResult(List<User> result) {
-		this.result = result;
-	}
-
 	@Override
 	public String toString() {
-		return "AjaxResponseResult [msg=" + msg + ", code=" + code + ", result=" + result + "]";
+		StringBuilder sb = new StringBuilder("[msg = ");
+		sb.append(msg).append(", code = ").append(code).append("]");
+		return sb.toString();
 	}
 
 }
