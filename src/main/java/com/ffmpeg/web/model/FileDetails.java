@@ -6,6 +6,8 @@ public class FileDetails {
 
 	private String outputFile;
 	
+	private String ffmpegEncoder;
+
 	private String ffmpegPreset;
 	
 	private int ffmpegCrf;
@@ -42,6 +44,14 @@ public class FileDetails {
 		this.ffmpegCrf = ffmpegCrf;
 	}
 
+	public String getFfmpegEncoder() {
+		return ffmpegEncoder;
+	}
+	
+	public void setFfmpegEncoder(String ffmpegEncoder) {
+		this.ffmpegEncoder = ffmpegEncoder;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -49,6 +59,8 @@ public class FileDetails {
 		  .append(inputFile)
 		  .append(", outputFile = ")
 		  .append(outputFile)
+		  .append(", ffmpegEncoder = ")
+		  .append(ffmpegEncoder)
 		  .append(", ffmpegPreset = ")
 		  .append(ffmpegPreset)
 		  .append(", ffmpegCrf = ")

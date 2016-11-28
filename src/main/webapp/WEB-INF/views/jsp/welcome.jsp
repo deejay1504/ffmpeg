@@ -35,14 +35,19 @@
 			if ($("#inputFile").val() == '') {
 				showAlert('Please select a valid file to start the conversion process', 'W');
 			} else {
-				$("#feedback").hide();
-				$("#timer").timer("remove");
-				$("#timer").timer("start");
-	
-				// Disable the search button
-				enableSearchButton(false);
-	
-				convertViaAjax();
+				var inputFile  = $("#inputFile").val();
+				var outputFile = $("#outputFile").val();
+				if (inputFile == outputFile) {
+					showAlert(' Please enter a different name to the input file', 'W');
+				} else {
+					$("#timer").timer("remove");
+					$("#timer").timer("start");
+		
+					// Disable the search button
+					enableSearchButton(false);
+		
+					convertViaAjax();
+				}
 			}
 		});
 		
@@ -54,7 +59,6 @@
 				event.preventDefault();
 				showAlert('Cannot cancel process, file conversion is not running', 'W');
 			} else {
-				$("#feedback").hide();
 				$("#timer").timer("pause");
 	
 				cancelViaAjax();
@@ -71,7 +75,7 @@
 				$("#outputFile").val(fileParts[0] + ".new.mp4")
 			}
 		});
-		
+
 		$('.alert .close').on('click', function(e) {
 		    $(this).parent().hide();
 		});
@@ -79,44 +83,29 @@
 	});
 	
 	function convertViaAjax() {
-
 		var fileDetails = {}
-		fileDetails["inputFile"]    = $("#inputFile").val();
-		fileDetails["outputFile"]   = $("#outputFile").val();
-		fileDetails["ffmpegPreset"] = $("#ffmpegPreset").val();
-		fileDetails["ffmpegCrf"]    = $("#ffmpegCrf").val();
+		fileDetails["inputFile"]     = $("#inputFile").val();
+		fileDetails["outputFile"]    = $("#outputFile").val();
+		fileDetails["ffmpegEncoder"] = $("#ffmpegEncoder").val();
+		fileDetails["ffmpegPreset"]  = $("#ffmpegPreset").val();
+		fileDetails["ffmpegCrf"]     = $("#ffmpegCrf").val();
 
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			url : "${home}ffmpeg/api/convertFile",
-			data : JSON.stringify(fileDetails),
-			dataType : 'json',
-			success : function(data) {
-				console.log("SUCCESS: ", data);
-				displayAlert(data);
-			},
-			error : function(e) {
-				console.log("ERROR: ", e);
-				displayAlert(e);
-			},
-			done : function(e) {
-				console.log("DONE");
-				enableSearchButton(true);
-			}
-		});
-
+		ajaxPost('${home}ffmpeg/api/convertFile', fileDetails);
 	}
 	
 	function cancelViaAjax() {
 		var fileDetails = {}
-		fileDetails["inputFile"]    = $("#inputFile").val();
-		fileDetails["outputFile"]   = $("#outputFile").val();
+		fileDetails["inputFile"]  = $("#inputFile").val();
+		fileDetails["outputFile"] = $("#outputFile").val();
 		
+		ajaxPost('${home}ffmpeg/api/cancelConversion', fileDetails);
+	}
+	
+	function ajaxPost(restUrl, fileDetails) {
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
-			url : "${home}ffmpeg/api/cancelConversion",
+			url : restUrl,
 			data : JSON.stringify(fileDetails),
 			dataType : 'json',
 			success : function(data) {
@@ -156,16 +145,6 @@
 		$('#alertModal').modal('show');
 	}
 
-	function display(data) {
-		var json = "<h4>Conversion details</h4>"
-			+ "<pre>Code: " + data.code 
-			+ "<br/>Message: " + data.msg
-			+ "</pre>";
-		$('#feedback').html(json);
-		$("#feedback").show();
-		$("#timer").timer("pause");
-	}
-	
 	function displayAlert(data) {
 		$("#timer").timer("pause");
 		var msgType;
@@ -236,6 +215,22 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
+				<label class="col-sm-3 control-label">Encoder</label>
+				<div class="col-sm-3">
+					<select id="ffmpegEncoder" class="form-control">
+					    <option value="libx265" selected="selected">HEVC</option>
+					    <option value="libx264">AVC</option>
+					</select>
+				</div>
+				<div>
+					<a data-toggle="tooltip" class="tooltipLink" data-html="true" 
+					   data-original-title="HEVC - High Efficiency Video Coding (newer version)<br>HEVC - slower but creates smaller files<br>AVC - Advanced Video Coding (older version)<br>AVC - quicker but creates bigger files">
+					  <span class="glyphicon glyphicon-info-sign"></span>
+					</a>
+				</div>
+			</div>
+			
+			<div class="form-group form-group-lg">
 				<label class="col-sm-3 control-label">Process Speed</label>
 				<div class="col-sm-3">
 					<select id="ffmpegPreset" class="form-control">
@@ -272,7 +267,7 @@
 					</select>
 				</div>
 				<div>
-					<a data-toggle="tooltip" class="tooltipLink" data-original-title="A lower conversion rate factor will take longer to create a file">
+					<a data-toggle="tooltip" class="tooltipLink" data-original-title="A lower conversion rate factor will take longer but create a better file resolution">
 					  <span class="glyphicon glyphicon-info-sign"></span>
 					</a>
 				</div>
@@ -292,9 +287,6 @@
 				</div>
 			</div>
 		</form>
-		
-		<br>
-		<div id="feedback"></div>
 		
 	</div>
 
