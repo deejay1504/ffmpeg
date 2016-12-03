@@ -26,6 +26,8 @@
 	jQuery(document).ready(function($) {
 		$("#dateToday").text((new Date()).toString().split(' ').splice(0,4).join(' '));
 		
+		ajaxGet('${home}ffmpeg/api/getVideoFiles');
+		
 		$("a.tooltipLink").tooltip({placement : 'right'});
 		
 		$("#btn-convert").click(function(event) {
@@ -101,6 +103,27 @@
 		ajaxPost('${home}ffmpeg/api/cancelConversion', fileDetails);
 	}
 	
+	function ajaxGet(restUrl) {
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			url : restUrl,
+			dataType : 'json',
+			success : function(data) {
+				console.log("SUCCESS: ", data);
+				setFileCount(data);
+			},
+			error : function(e) {
+				console.log("ERROR: ", e);
+				displayAlert(e);
+			},
+			done : function(e) {
+				console.log("DONE");
+				enableSearchButton(true);
+			}
+		});
+	}
+	
 	function ajaxPost(restUrl, fileDetails) {
 		$.ajax({
 			type : "POST",
@@ -125,6 +148,16 @@
 	
 	function enableSearchButton(flag) {
 		$("#btn-convert").prop("disabled", flag);
+	}
+	
+	function setFileCount(data) {
+		$("#fileCount").text(data.fileName.length);
+		$('#inputFile').html('');
+ 		$('#inputFile').append('<option id=blank></option>');
+ 		
+      	$.each(data.fileName, function(key, val){ 
+        	$('#inputFile').append('<option id="' + val + '">' + val + '</option>');
+      	})
 	}
 
 	function showAlert(alertMsg, msgType) {
@@ -190,10 +223,27 @@
 		</div>
 		
 		<form class="form-horizontal" id="file-convert-form">
-			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Input File</label>
+			<!-- <div class="form-group form-group-lg">
+				<label class="col-sm-3 control-label"><span id="fileCount" class="badge"></span> Video Files 
+					<span class="glyphicon glyphicon-folder-open"></span>
+				</label>
 				<div class="col-sm-6">
-					<input type="file" style="padding:0px;" class="form-control" id="inputFile" >
+					<input type="file" style="padding:0px;" class="form-control" id="inputFile">
+				</div>
+				<div>
+					<a data-toggle="tooltip" class="tooltipLink" data-original-title="Select a video file for conversion">
+					  <span class="glyphicon glyphicon-info-sign"></span>
+					</a>
+				</div>
+			</div>
+			-->
+			
+			<div class="form-group form-group-lg">
+				<label class="col-sm-3 control-label"><span id="fileCount" class="badge"></span> Video Files 
+					<span class="glyphicon glyphicon-folder-open"></span>
+				</label>
+				<div class="col-sm-6">
+					<select id="inputFile" class="form-control"></select>
 				</div>
 				<div>
 					<a data-toggle="tooltip" class="tooltipLink" data-original-title="Select a video file for conversion">
@@ -203,7 +253,7 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Output File</label>
+				<label class="col-sm-3 control-label">Output File <span class="glyphicon glyphicon-folder-open"></span></label>
 				<div class="col-sm-6">
 					<input type="text" class="form-control" id="outputFile">
 				</div>
@@ -215,7 +265,7 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Encoder</label>
+				<label class="col-sm-3 control-label">Encoder <span class="glyphicon glyphicon-facetime-video"></span></label>
 				<div class="col-sm-3">
 					<select id="ffmpegEncoder" class="form-control">
 					    <option value="libx265" selected="selected">HEVC</option>
@@ -231,7 +281,7 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Process Speed</label>
+				<label class="col-sm-3 control-label">Process Speed <span class="glyphicon glyphicon-flash"></span></label>
 				<div class="col-sm-3">
 					<select id="ffmpegPreset" class="form-control">
 					    <option value="ultrafast">Ultra Fast</option>
@@ -253,7 +303,7 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Conversion Rate</label>
+				<label class="col-sm-3 control-label">Conversion Rate <span class="glyphicon glyphicon-dashboard"></span></label>
 				<div class="col-sm-3">
 					<select id="ffmpegCrf" class="form-control">
 					    <option value="18">18</option>
@@ -274,14 +324,14 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Process Time </label>
+				<label class="col-sm-3 control-label">Process Time <span class="glyphicon glyphicon-time"></span></label>
 				<div class="col-sm-3">
 					<input type="text" class="form-control" id="timer" name="timer" placeholder="0 sec">
 				</div>
 			</div>
 
 			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-10">
+				<div class="col-sm-offset-3 col-sm-10">
 					<button id="btn-convert" class="btn btn-primary btn-lg">Convert</button>
 					<button id="btn-cancel" class="btn btn-primary btn-lg">Cancel</button>
 				</div>

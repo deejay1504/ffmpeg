@@ -4,6 +4,12 @@ public final class Constants {
 
 	private Constants() {}
 
+	public final static class VideoFiles {
+		private VideoFiles() {}
+		
+		public static final String[] VIDEO_FILE_FILTERS = {"avi", "mp4", "mkv", "mov"};
+	}
+
 	public final class Property {
 		private Property() {}
 		
