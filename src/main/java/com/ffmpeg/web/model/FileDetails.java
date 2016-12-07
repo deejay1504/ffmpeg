@@ -1,6 +1,9 @@
 package com.ffmpeg.web.model;
 
-public class FileDetails {
+public class FileDetails extends FfmpegDetails {
+	private String filePath;
+
+	private String ffmpegPath;
 
 	private String inputFile;
 
@@ -52,6 +55,22 @@ public class FileDetails {
 		this.ffmpegEncoder = ffmpegEncoder;
 	}
 
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public String getFfmpegPath() {
+		return ffmpegPath;
+	}
+
+	public void setFfmpegPath(String ffmpegPath) {
+		this.ffmpegPath = ffmpegPath;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -67,5 +86,4 @@ public class FileDetails {
 		  .append(ffmpegCrf);
 		return sb.toString();
 	}
-
 }

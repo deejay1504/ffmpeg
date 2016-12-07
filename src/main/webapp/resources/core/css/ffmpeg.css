@@ -12,12 +12,16 @@
      background-color:#CEF6F5; 
 }
 
-#modalCloseButton {
+#modal-close-button {
      background-color:#CEF6F5; /* Light blue */
 }
 
 .modal-content {
     overflow:hidden;
+}
+
+.badge-colour {
+	background-color:#F78181; /* Light red */
 }
 
 /** This makes the tool tip appear in one long line and not wrap around **/

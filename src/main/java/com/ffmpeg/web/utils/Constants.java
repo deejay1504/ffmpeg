@@ -4,18 +4,35 @@ public final class Constants {
 
 	private Constants() {}
 
+	public final static class ProgramName {
+		private ProgramName() {}
+		
+		public static final String WINDOWS = "ffmpeg.exe";
+		public static final String UNIX    = "ffmpeg";
+	}
+
+	public final static class OS {
+		private OS() {}
+		
+		public static final String OS_NAME = "os.name";
+		public static final String NIX     = "nix";
+		public static final String NUX     = "nux";
+		public static final String AIX     = "aix";
+	}
+	
+	public final static class Url {
+		private Url() {}
+		
+		public static final String CONVERT    = "/ffmpeg/api/convertFile";
+		public static final String GET_VIDEO  = "/ffmpeg/api/getVideoFiles";
+		public static final String CANCEL     = "/ffmpeg/api/cancelConversion";
+		public static final String SAVE_ADMIN = "/ffmpeg/api/saveAdmin";
+	}
+	
 	public final static class VideoFiles {
 		private VideoFiles() {}
 		
 		public static final String[] VIDEO_FILE_FILTERS = {"avi", "mp4", "mkv", "mov"};
-	}
-
-	public final class Property {
-		private Property() {}
-		
-		public static final String FILE_PATH = "file.path";
-		public static final String PATH      = "ffmpeg.path";
-		public static final String FORMAT    = "ffmpeg.format";
 	}
 
 	public final class Ffmpeg {
@@ -44,5 +61,7 @@ public final class Constants {
 		public static final String ERROR            = "Error processing {0} {1}";
 		public static final String CONVERSION_ERROR = "Conversion error {0}";
 		public static final String CANCEL_CONV      = "Conversion process is not running";
+		public static final String JSON_SUCCESS     = "Successfully stored Admin details";
+		public static final String JSON_ERROR       = "Error in JSON mapper";
 	}
 }

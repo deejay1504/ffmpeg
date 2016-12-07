@@ -32,7 +32,7 @@ public class FileAjaxResponse {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("[fileName = ");
-		sb.append(fileName.toString()).append(", code = ").append(code).append("]");
+		sb.append(fileName).append(", code = ").append(code).append("]");
 		return sb.toString();
 	}
 
