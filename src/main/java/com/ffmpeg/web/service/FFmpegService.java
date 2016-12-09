@@ -12,7 +12,6 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.ffmpeg.web.controller.AjaxController;
 import com.ffmpeg.web.model.AjaxResponseBody;
@@ -31,7 +30,7 @@ public class FFmpegService {
 
 	/**
 	 * Generate and call an ffmpeg command in the form:
-	 * ffmpeg -i c:\temp\t.mp4 -c:v libx264 -crf 20 -preset slow -c:a copy c:\temp\t.new.mp4 -nostats -loglevel 0
+	 * ffmpeg -i c:\temp\t.mp4 -c:v libx264 -y -crf 20 -preset slow -c:a copy c:\temp\t.new.mp4 -nostats -loglevel 0
 	 * 
 	 * @param fileDetails
 	 * @param result
@@ -47,11 +46,6 @@ public class FFmpegService {
 		
 		String ffmpegProgram = VideoFileHelper.isOsUnix() ? Constants.ProgramName.UNIX : Constants.ProgramName.WINDOWS;
 		
-		File outputFile = new File(filePath + fileDetails.getOutputFile());
-		if (outputFile.exists()) {
-			outputFile.delete();
-		}
-		
 		StringBuilder ffmpegCmd = new StringBuilder();
 		ffmpegCmd.append(ffmpegPath)
  				 .append(ffmpegProgram)
@@ -60,6 +54,7 @@ public class FFmpegService {
 				 .append(fileDetails.getInputFile())
 				 .append(Constants.Ffmpeg.FORMAT)
 				 .append(ffmpegEncoder)
+				 .append(Constants.Ffmpeg.OVERWRITE)
 				 .append(Constants.Ffmpeg.CONVERSION_RATE)
 				 .append(ffmpegCrf)
 				 .append(Constants.Ffmpeg.PRESET)
@@ -92,12 +87,20 @@ public class FFmpegService {
 	
 	public FileAjaxResponse getVideoFiles(FfmpegDetails ffmpegDetails) {
 		FileAjaxResponse result = new FileAjaxResponse();
-		if (VideoFileHelper.validFfmpegProgram(ffmpegDetails)) {
-			List<String> videoFiles = VideoFileHelper.listVideoFiles(ffmpegDetails.getFilePath());
-			result.setCode(Constants.Codes.SUCCESS);
-			result.setFileName(videoFiles);
+		String filePath = VideoFileHelper.putSeparatorOnFilePath(ffmpegDetails.getFilePath());
+		File dirOutputFile = new File(filePath);
+		if (dirOutputFile.exists() && dirOutputFile.isDirectory()) {
+			if (VideoFileHelper.validFfmpegProgram(ffmpegDetails)) {
+				List<String> videoFiles = VideoFileHelper.listVideoFiles(ffmpegDetails.getFilePath());
+				result.setCode(Constants.Codes.SUCCESS);
+				result.setFileName(videoFiles);
+			} else {
+				result.setCode(Constants.Codes.FFMPEG_ERROR);
+				result.setMsg(MessageFormat.format(Constants.Messages.FFMPEG_DIR_ERROR, ffmpegDetails.getFfmpegPath()));
+			}
 		} else {
 			result.setCode(Constants.Codes.ERROR);
+			result.setMsg(MessageFormat.format(Constants.Messages.DIR_ERROR, ffmpegDetails.getFilePath()));
 		}
 		return result;
 	}

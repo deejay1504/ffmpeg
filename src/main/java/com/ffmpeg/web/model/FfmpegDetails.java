@@ -2,9 +2,9 @@ package com.ffmpeg.web.model;
 
 public class FfmpegDetails {
 
-	private String filePath;
+	protected String filePath;
 
-	private String ffmpegPath;
+	protected String ffmpegPath;
 
 	public String getFilePath() {
 		return filePath;

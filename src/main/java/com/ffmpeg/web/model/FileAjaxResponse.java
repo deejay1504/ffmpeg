@@ -12,6 +12,9 @@ public class FileAjaxResponse {
 	
 	@JsonView(Views.Public.class)
 	private String code;
+
+	@JsonView(Views.Public.class)
+	private String msg;
 	
 	public List<String> getFileName() {
 		return fileName;
@@ -29,10 +32,18 @@ public class FileAjaxResponse {
 		this.code = code;
 	}
 
+	public String getMsg() {
+		return msg;
+	}
+	
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("[fileName = ");
-		sb.append(fileName).append(", code = ").append(code).append("]");
+		sb.append(fileName).append(", code = ").append(code).append(", msg = ").append(msg).append("]");
 		return sb.toString();
 	}
 

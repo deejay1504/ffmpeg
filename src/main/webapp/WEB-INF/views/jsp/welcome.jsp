@@ -29,9 +29,30 @@
 		$("#file-path").val(localStorage.filePath);
 		$("#ffmpeg-path").val(localStorage.ffmpegPath);
 		
+		hideError("#input-file-div", "#input-error");
+		hideError("#output-file-div", "#output-error");
+		hideError("#ffmpeg-file-div", "#ffmpeg-error");
+		hideError("#file-path-div", "#file-path-error");
+		
 		if ($("#file-path").val() != '') {
 			getVideoFiles();
 		}
+		
+		$("#input-file-div").click(function () {
+			hideError("#input-file-div", "#input-error");
+		});
+		
+		$("#output-file-div").click(function () {
+			hideError("#output-file-div", "#output-error");
+		});
+
+		$("#ffmpeg-file-div").click(function () {
+			hideError("#ffmpeg-file-div", "#ffmpeg-error");
+		});
+
+		$("#file-path-div").click(function () {
+			hideError("#file-path-div", "#file-path-error");
+		});
 		
 		$("#accordian-button").click(function(e) {
 		  that = $(this)
@@ -48,8 +69,10 @@
 
 			if ($("#ffmpeg-path").val() == '') {
 				showAlert('Please select a valid ffmpeg directory', 'W', '');
+				showError("#ffmpeg-file-div", "#ffmpeg-error");
 			} else if ($("#file-path").val() == '') {
 				showAlert('Please select a valid output directory for the videos', 'W', '');
+				showError("#file-path-div", "#file-path-error");
 			} else {
 				convertButtonDisabled(true);
 				localStorage.filePath   = $("#file-path").val();
@@ -63,14 +86,19 @@
 		$("#btn-convert").click(function(event) {
 			// Prevent the form from submitting via the browser.
 			event.preventDefault();
-
+			
 			if ($("#input-file").val() == '') {
 				showAlert('Please select a valid file to start the conversion process', 'W', '');
+				showError("#input-file-div", "#input-error");
+			} else if ($("#output-file").val() == '') {
+				showAlert('Please select an output file to start the conversion process', 'W', '');
+				showError("#output-file-div", "#output-error");
 			} else {
 				var inputFile  = $("#input-file").val();
 				var outputFile = $("#output-file").val();
 				if (inputFile == outputFile) {
-					showAlert(' Please enter a different name to the input file', 'W', '');
+					showAlert('Please enter a different name to the input file', 'W', '');
+					showError("#output-file-div", "#output-error");
 				} else {
 					$("#timer").timer("remove");
 					$("#timer").timer("start");
@@ -100,8 +128,9 @@
 			var inputFile = $("#input-file").val();
 			if (inputFile.indexOf(' ') !== -1) {
 				showAlert(inputFile + ' was selected. Please select a file without spaces in the name', 'W', '');
-				$("#input-file").val('');
+				showError("#input-file-div", "#input-error");
 			} else {
+				hideError("#output-file-div", "#output-error");
 				var fileParts = inputFile.split(".");
 				$("#output-file").val(fileParts[0] + ".new.mp4")
 			}
@@ -112,6 +141,16 @@
 		});
 
 	});
+	
+	function showError(divName, errorId) {
+		$(divName).addClass("has-error");
+		$(errorId).show();	
+	}
+
+	function hideError(divName, errorId) {
+		$(divName).removeClass("has-error");
+		$(errorId).hide();	
+	}
 	
 	function getVideoFiles() {
 		var ffmpegDetails = {}
@@ -197,15 +236,22 @@
 	
 	function setFileCount(data) {
 		if (data.code == '400') {
-			showAlert('The \'ffmpeg\' program is not located in the ' + $("#ffmpeg-path").val() + ' directory. Please select another.', 'E', '');
+			showAlert(data.msg, 'E', '');
+			showError("#file-path-div", "#file-path-error");
+		} else if (data.code == '422') {
+			showAlert(data.msg, 'E', '');
+			showError("#ffmpeg-file-div", "#ffmpeg-error");
 		} else {
+			if (data.fileName.length == 0) {
+				showAlert('There are currently no video files in the ' + $("#file-path").val() + ' directory.\nPut some in here before running the conversion process.', 'W', '');
+			}
 			$("#file-count").text(data.fileName.length);
 			$('#input-file').html('');
 	 		$('#input-file').append('<option id=blank></option>');
 	 		
 	      	$.each(data.fileName, function(key, val){ 
 	        	$('#input-file').append('<option id="' + val + '">' + val + '</option>');
-	      	})
+	      	});
 		}
 	}
 
@@ -264,7 +310,7 @@
 		                <h4 class="modal-title">Warning!</h4>
 		            </div>
 		            <div class="modal-body">
-		                <label id="alert-modal-msg" ></label>
+		                <label id="alert-modal-msg"></label>
 		            </div>
 		            <div class="modal-footer">
 		                <button id="modal-close-button" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -279,8 +325,9 @@
 				<label class="col-sm-3 control-label"><span id="file-count" class="badge badge-colour"></span> Video Files 
 					<span class="glyphicon glyphicon-folder-open"></span>
 				</label>
-				<div class="col-sm-6">
+				<div id="input-file-div" class="col-sm-6">
 					<select id="input-file" class="form-control"></select>
+					<span id="input-error" class="glyphicon glyphicon-remove form-control-feedback"></span>
 				</div>
 				<div>
 					<a data-toggle="tooltip" class="tool-tip-link" data-original-title="Select a video file for conversion">
@@ -290,9 +337,10 @@
 			</div>
 			
 			<div class="form-group form-group-lg">
-				<label class="col-sm-3 control-label">Output File <span class="glyphicon glyphicon-folder-open"></span></label>
-				<div class="col-sm-6">
-					<input id="output-file" type="text" class="form-control">
+				<label class="col-sm-3 control-label">Converted File <span class="glyphicon glyphicon-folder-open"></span></label>
+				<div id="output-file-div" class="col-sm-6">
+					<input id="output-file" name="output-file" type="text" class="form-control">
+					<span id="output-error" class="glyphicon glyphicon-remove form-control-feedback"></span>
 				</div>
 				<div>
 					<a data-toggle="tooltip" class="tool-tip-link" data-original-title="This will be the name of the converted file">
@@ -389,8 +437,9 @@
 								<label class="col-sm-3 control-label">Ffmpeg path
 									<span class="glyphicon glyphicon-folder-open"></span>
 								</label>
-								<div class="col-sm-6">
+								<div id="ffmpeg-file-div" class="col-sm-6">
 									<input id="ffmpeg-path" type="text" class="form-control">
+									<span id="ffmpeg-error" class="glyphicon glyphicon-remove form-control-feedback"></span>
 								</div>
 								<div>
 									<a data-toggle="tooltip" class="tool-tip-link" data-original-title="Directory where ffmpeg is installed">
@@ -402,8 +451,9 @@
 								<label class="col-sm-3 control-label">Output file path
 									<span class="glyphicon glyphicon-folder-open"></span>
 								</label>
-								<div class="col-sm-6">
+								<div id="file-path-div" class="col-sm-6">
 									<input id="file-path" type="text" class="form-control">
+									<span id="file-path-error" class="glyphicon glyphicon-remove form-control-feedback"></span>
 								</div>
 								<div>
 									<a data-toggle="tooltip" class="tool-tip-link" data-html="true"
