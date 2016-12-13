@@ -20,7 +20,7 @@ import com.ffmpeg.web.utils.Constants;
 @RestController
 public class AjaxController {
 	@Autowired
-	FFmpegService fFmpegService;
+	FFmpegService ffmpegService;
 	
 	@JsonView(Views.Public.class)
 	@RequestMapping(value = Constants.Url.CONVERT)
@@ -28,7 +28,7 @@ public class AjaxController {
 
 		AjaxResponseBody result = new AjaxResponseBody();
 		try {
-			fFmpegService.convertFile(fileDetails, result);
+			ffmpegService.convertFile(fileDetails, result);
 		} catch (IOException e) {
 			result.setCode(Constants.Codes.ERROR);
 			result.setMsg(MessageFormat.format(Constants.Messages.ERROR, fileDetails.getInputFile(), e.toString()));
@@ -42,12 +42,12 @@ public class AjaxController {
 	
 	@RequestMapping(value = Constants.Url.CANCEL)
 	public AjaxResponseBody cancelConversionViaAjax(@RequestBody FileDetails fileDetails) {
-		return fFmpegService.cancelConversion(fileDetails);
+		return ffmpegService.cancelConversion(fileDetails);
 	}
 
 	@RequestMapping(value = Constants.Url.GET_VIDEO)
 	public FileAjaxResponse getVideoFiles(@RequestBody FfmpegDetails ffmpegDetails) {
-		return fFmpegService.getVideoFiles(ffmpegDetails);
+		return ffmpegService.getVideoFiles(ffmpegDetails);
 	}
 
 }
